@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mien — control your screen with your face</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0E1216;--panel:#151B21;--raised:#1D252D;--line:#2A343E;--text:#EAEEF2;--muted:#93A0AE;--accent:#FFB547;--ink:#2A1A00;--focus:#8FB4FF;--meter:#4A5B6B}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--text);font:15px/1.5 "DM Sans",system-ui,sans-serif}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+header,main{max-width:1240px;margin:0 auto;padding-left:24px;padding-right:24px}
+header{padding-top:22px;padding-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+h1{font:400 40px/1 "Instrument Serif",Georgia,serif}
+.brand p{color:var(--muted);font-size:13px;margin-top:2px}
+.pill{display:flex;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--line);padding:6px 14px;border-radius:999px;font-size:13px}
+.pill i{width:8px;height:8px;border-radius:50%;background:var(--meter)}
+.pill.live i{background:var(--accent);box-shadow:0 0 0 4px #ffb54733}
+main{padding-top:12px;padding-bottom:48px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:start}
+.left{position:sticky;top:16px;display:grid;gap:14px}
+.btn{border:1px solid var(--line);background:var(--raised);padding:8px 14px;border-radius:10px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--muted)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--ink)}
+.btn.sm{padding:5px 11px;font-size:13px}
+.stage{position:relative;border-radius:22px;overflow:hidden;background:#06090B;aspect-ratio:4/3;border:1px solid var(--line);transition:box-shadow .2s}
+.stage.hit{box-shadow:0 0 0 3px var(--accent)}
+video,canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;padding:20px;background:#0a0e12cc;backdrop-filter:blur(6px)}
+.overlay.low{background:none;backdrop-filter:none;place-items:end center}
+.card{max-width:440px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px;display:grid;gap:14px;text-align:center;justify-items:center}
+.card h2{font:400 32px/1.1 "Instrument Serif",Georgia,serif}
+.card p{color:var(--muted)}
+.card .bar{width:100%}.card .bar i{background:var(--accent)}
+.spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:r 1s linear infinite}
+@keyframes r{to{transform:rotate(360deg)}}
+.tools{position:absolute;top:12px;right:12px;display:flex;gap:6px}
+.tools .btn{background:#0e1216b8;backdrop-filter:blur(6px)}
+.tools .btn[aria-pressed=true]{border-color:var(--accent)}
+.flash{position:absolute;left:50%;bottom:16px;transform:translate(-50%,8px);background:var(--accent);color:var(--ink);padding:8px 16px;border-radius:999px;font-weight:600;opacity:0;pointer-events:none;transition:.2s}
+.flash.show{opacity:1;transform:translate(-50%,0)}
+.hint{color:var(--muted);font-size:13px}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 11px;text-align:left;cursor:pointer;display:grid;gap:7px;font-size:13px}
+.chip:hover{border-color:var(--muted)}
+.bar,.track{height:6px;background:var(--line);border-radius:9px;overflow:hidden}
+.bar i,.track i{display:block;height:100%;background:var(--meter);transform-origin:left;transform:scaleX(0)}
+.bar i.hot,.track i.hot{background:var(--accent)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px}
+[role=tab]{background:none;border:0;padding:10px 14px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;font-weight:500}
+[role=tab][aria-selected=true]{color:var(--text);border-color:var(--accent)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;color:var(--muted);font-size:14px}
+.rule{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:14px;margin-bottom:12px}
+.sent{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;color:var(--muted);font-size:14px}
+select,input:not([type]),textarea{background:var(--raised);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%}
+textarea{resize:vertical;min-height:300px}
+.field{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.meter{position:relative;height:26px;display:flex;align-items:center}
+.meter .track{width:100%;height:10px}
+.meter input{position:absolute;inset:0;width:100%;margin:0;appearance:none;background:none}
+.meter input::-webkit-slider-runnable-track{background:none}
+.meter input::-webkit-slider-thumb{appearance:none;width:5px;height:24px;border-radius:3px;background:var(--text);cursor:ew-resize}
+.meter input::-moz-range-thumb{width:5px;height:24px;border:0;border-radius:3px;background:var(--text)}
+.hold{display:block;height:3px;border-radius:3px;background:var(--accent);transform-origin:left;transform:scaleX(0);margin-top:-6px}
+input[type=range],input[type=checkbox]{accent-color:var(--accent)}
+.opts{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.opts label{display:flex;gap:8px;align-items:center}
+.foot{display:flex;justify-content:space-between;align-items:center}
+.foot div{display:flex;gap:8px;align-items:center}
+.link{background:none;border:0;color:var(--muted);cursor:pointer;text-decoration:underline;font-size:13px}
+.empty{color:var(--muted);padding:24px 0;text-align:center}
+#log{list-style:none;padding:0;display:grid;gap:6px;font-size:14px}
+#log li{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+#log time{color:var(--muted);font-size:12px;margin-right:6px}
+#toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:9}
+.toast{background:var(--text);color:var(--bg);padding:9px 16px;border-radius:999px;font-weight:500;box-shadow:0 10px 30px #0006}
+@media(max-width:960px){main{grid-template-columns:1fr}.left{position:static}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><h1>Mien</h1><p>Face-controlled actions</p></div>
+  <div class="pill" id="status" role="status"><i></i><span>Camera off</span></div>
+</header>
+<main>
+  <section class="left">
+    <div class="stage" id="stage">
+      <video id="video" playsinline muted></video><canvas id="mesh"></canvas>
+      <div class="tools" id="tools" hidden>
+        <button class="btn sm" id="meshBtn" aria-pressed="true">Mesh</button>
+        <button class="btn sm" id="calBtn">Recalibrate</button>
+        <button class="btn sm" id="stopBtn">Stop</button>
+      </div>
+      <div class="flash" id="flash" aria-hidden="true"></div>
+      <div class="overlay" id="overlay"></div>
+    </div>
+    <div>
+      <p class="hint" style="margin-bottom:8px">Live signals. Select one to make a rule for it.</p>
+      <div class="chips" id="chips"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="tabs" role="tablist" aria-label="Panels">
+      <button role="tab" id="t-rules" aria-controls="p-rules" aria-selected="true">Rules</button>
+      <button role="tab" id="t-note" aria-controls="p-note" aria-selected="false" tabindex="-1">Notepad</button>
+      <button role="tab" id="t-log" aria-controls="p-log" aria-selected="false" tabindex="-1">Activity</button>
+    </div>
+    <div role="tabpanel" id="p-rules" aria-labelledby="t-rules">
+      <div class="row"><span>A rule runs when its gesture passes the marker and is held long enough.</span><button class="btn sm" id="addBtn">Add rule</button></div>
+      <div id="rules"></div>
+    </div>
+    <div role="tabpanel" id="p-note" aria-labelledby="t-note" hidden>
+      <div class="row"><span>Rules that type text write here.</span><button class="btn sm" id="clrBtn">Clear</button></div>
+      <textarea id="note" aria-label="Notepad"></textarea>
+    </div>
+    <div role="tabpanel" id="p-log" aria-labelledby="t-log" hidden>
+      <p class="empty" id="logEmpty">Triggered actions will appear here.</p>
+      <ol id="log"></ol>
+    </div>
+  </section>
+</main>
+<div id="toasts" role="status" aria-live="polite"></div>
+
+<script type="module">
+const $=s=>document.querySelector(s), clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const h=(t,a={},...c)=>{const e=document.createElement(t);for(const k in a){const v=a[k];if(k==='on')for(const n in v)e.addEventListener(n,v[n]);else if(k in e)e[k]=v;else e.setAttribute(k,v)}e.append(...c);return e};
+
+/* ---------- Gestures and actions ---------- */
+const G=[['smile','Smile',250],['mouth_open','Open mouth',250],['brows','Raise eyebrows',300],['blink','Long blink',500],
+ ['wink_l','Wink left eye',350],['wink_r','Wink right eye',350],['pucker','Pucker lips',300],
+ ['turn_l','Turn head left',300],['turn_r','Turn head right',300],['look_up','Tilt head up',300],['look_down','Tilt head down',300]]
+ .map(([id,label,hold])=>({id,label,hold}));
+const A=[['Write',[['type_text','Type into notepad','Text to type','Hello! It is {time}'],['toast','Show a message','Message','Nice one!'],['speak','Speak aloud','Words to say','Hello there'],['copy','Copy to clipboard','Text to copy','']]],
+ ['Navigate',[['scroll_up','Scroll page up'],['scroll_down','Scroll page down'],['open_url','Open a link','Link','https://']]],
+ ['Other',[['chime','Play a chime'],['webhook','Send a webhook','Webhook URL','https://'],['toggle_pause','Pause or resume control']]]];
+const ACT={};A.forEach(([,l])=>l.forEach(([id,label,pl,ph])=>ACT[id]={id,label,pl,ph}));
+const glabel=id=>G.find(g=>g.id===id).label;
+
+/* ---------- State ---------- */
+const mk=(g,a,p='',hold)=>({id:Math.random().toString(36).slice(2,8),gesture:g,action:a,param:p,th:.6,hold:hold??G.find(x=>x.id===g).hold,cool:800,rep:a.startsWith('scroll'),repMs:70,on:true});
+const starter=()=>[mk('look_up','scroll_up'),mk('look_down','scroll_down'),mk('smile','type_text','Smile logged at {time}\\n'),mk('brows','chime'),mk('pucker','toggle_pause','',600)];
+let S={rules:[],mesh:true};
+try{const j=localStorage.getItem('mien');j?Object.assign(S,JSON.parse(j)):S.rules=starter()}catch{S.rules=starter()}
+const save=()=>{try{localStorage.setItem('mien',JSON.stringify(S))}catch{}};
+let paused=false,running=false,face=false,cal=null,calDone=false,base={earL:.27,earR:.27,pitch:.55,yaw:0};
+let fl,FL,du,audio,last=-1;
+const video=$('#video'),cv=$('#mesh'),cx=cv.getContext('2d'),sm={},rs={},meters={},chipEls={};
+G.forEach(g=>sm[g.id]=0);
+
+/* ---------- UI helpers ---------- */
+function toast(t){const e=h('div',{className:'toast'},t);$('#toasts').append(e);setTimeout(()=>e.remove(),2800)}
+function logit(t){$('#logEmpty').hidden=true;const l=$('#log');l.prepend(h('li',{},h('time',{},new Date().toLocaleTimeString()),t));while(l.children.length>60)l.lastChild.remove()}
+let ft;function flash(t){const f=$('#flash');f.textContent=t;f.classList.add('show');$('#stage').classList.add('hit');clearTimeout(ft);ft=setTimeout(()=>{f.classList.remove('show');$('#stage').classList.remove('hit')},1100)}
+function status(){const p=$('#status');let t='Camera off',live=false;
+ if(running){if(!face)t='No face in view';else if(cal||!calDone)t='Calibrating';else if(paused)t='Paused';else{t='Live';live=true}}
+ p.className='pill'+(live?' live':'');p.lastChild.textContent=t}
+function ov(html,low){const o=$('#overlay');o.hidden=!html;o.className='overlay'+(low?' low':'');o.innerHTML=html?'<div class="card">'+html+'</div>':'';const b=$('#startBtn');if(b)b.onclick=start}
+const idle='<h2>Control your screen with your face.</h2><p>Smile, raise your eyebrows or turn your head to run actions you choose. Video is processed on this device and never uploaded.</p><button class="btn pri" id="startBtn">Start camera</button>';
+const fail=m=>{running=false;status();ov('<p>'+m+'</p><button class="btn pri" id="startBtn">Try again</button>')};
+ov(idle);
+
+/* ---------- Camera and model ---------- */
+async function start(){
+  audio||=new (window.AudioContext||window.webkitAudioContext)();
+  ov('<div class="spin"></div><p>Loading the face model…</p>');
+  try{
+    if(!fl){
+      const V='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+      const m=await import(V+'/vision_bundle.mjs');FL=m.FaceLandmarker;
+      const fs=await m.FilesetResolver.forVisionTasks(V+'/wasm');
+      const o=d=>({baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',delegate:d},runningMode:'VIDEO',numFaces:1,outputFaceBlendshapes:true});
+      try{fl=await FL.createFromOptions(fs,o('GPU'))}catch{fl=await FL.createFromOptions(fs,o('CPU'))}
+      du=new m.DrawingUtils(cx);
+    }
+  }catch{return fail('Could not load the face model. Check your internet connection and try again.')}
+  try{
+    video.srcObject=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:960},height:{ideal:720},facingMode:'user'},audio:false});
+    await video.play();
+  }catch(e){return fail(e.name==='NotAllowedError'?'Camera access is blocked. Allow it from the address bar, then try again.':e.name==='NotFoundError'?'No camera found. Connect one and try again.':'Could not open the camera. Serve this file from http://localhost or https and try again.')}
+  $('#stage').style.aspectRatio=video.videoWidth+'/'+video.videoHeight;
+  running=true;calDone=false;cal=null;face=false;$('#tools').hidden=false;ov();status();loop();
+}
+function stop(){running=false;video.srcObject?.getTracks().forEach(t=>t.stop());video.srcObject=null;cx.clearRect(0,0,cv.width,cv.height);$('#tools').hidden=true;G.forEach(g=>sm[g.id]=0);step(0);status();ov(idle)}
+
+/* ---------- Face analysis ---------- */
+function feats(l,bs){
+  const w=video.videoWidth,hh=video.videoHeight,B=n=>bs[n]||0,d=(i,j)=>Math.hypot((l[i].x-l[j].x)*w,(l[i].y-l[j].y)*hh);
+  const ear=(a,b,c,e,f,g)=>(d(b,g)+d(c,f))/(2*d(a,e));
+  const eyeY=(l[33].y+l[263].y)/2;
+  return{smile:(B('mouthSmileLeft')+B('mouthSmileRight'))/2,jaw:B('jawOpen'),
+    brow:(B('browInnerUp')+(B('browOuterUpLeft')+B('browOuterUpRight'))/2)/2,
+    blink:Math.min(B('eyeBlinkLeft'),B('eyeBlinkRight')),pucker:B('mouthPucker'),
+    earR:ear(33,160,158,133,153,144),earL:ear(362,385,387,263,373,380),
+    yaw:(l[1].x-(l[234].x+l[454].x)/2)/Math.abs(l[454].x-l[234].x),
+    pitch:(l[1].y-eyeY)/(l[152].y-eyeY)};
+}
+function strengths(F){
+  const x=k=>F[k]-(base[k]||0);
+  const cL=clamp((base.earL-F.earL)/(base.earL*.7)),cR=clamp((base.earR-F.earR)/(base.earR*.7));
+  return{smile:clamp(x('smile')/.55),mouth_open:clamp(x('jaw')/.45),brows:clamp(x('brow')/.4),blink:clamp(x('blink')/.6),
+    pucker:clamp(x('pucker')/.5),wink_l:clamp(cL-.7*cR),wink_r:clamp(cR-.7*cL),
+    turn_l:clamp(x('yaw')/.22),turn_r:clamp(-x('yaw')/.22),look_up:clamp(-x('pitch')/.15),look_down:clamp(x('pitch')/.15)};
+}
+function loop(){
+  if(!running)return;requestAnimationFrame(loop);
+  if(video.readyState<2||video.currentTime===last)return;last=video.currentTime;
+  const now=performance.now(),r=fl.detectForVideo(video,now);
+  if(cv.width!==video.videoWidth){cv.width=video.videoWidth;cv.height=video.videoHeight}
+  cx.clearRect(0,0,cv.width,cv.height);
+  const l=r.faceLandmarks[0],was=face;face=!!l;
+  if(face!==was)status();
+  if(!l){G.forEach(g=>sm[g.id]*=.6);return step(now)}
+  if(S.mesh){
+    du.drawConnectors(l,FL.FACE_LANDMARKS_TESSELATION,{color:'#ffffff22',lineWidth:.5});
+    for(const c of [FL.FACE_LANDMARKS_FACE_OVAL,FL.FACE_LANDMARKS_LIPS,FL.FACE_LANDMARKS_LEFT_EYE,FL.FACE_LANDMARKS_RIGHT_EYE])du.drawConnectors(l,c,{color:'#FFB547',lineWidth:1.5});
+  }
+  const bs={};(r.faceBlendshapes[0]?.categories||[]).forEach(c=>bs[c.categoryName]=c.score);
+  const F=feats(l,bs);
+  if(!calDone&&!cal){cal={t0:now,n:0,sum:{}};ov('<p><b>Calibrating.</b> Relax your face and look at the camera.</p><div class="bar"><i id="calBar"></i></div>',1);status()}
+  if(cal){
+    for(const k in F)cal.sum[k]=(cal.sum[k]||0)+F[k];cal.n++;
+    $('#calBar').style.transform=`scaleX(${clamp((now-cal.t0)/2000)})`;
+    if(now-cal.t0>2000){base={};for(const k in cal.sum)base[k]=cal.sum[k]/cal.n;cal=null;calDone=true;ov();status();toast('Calibrated. Try a smile.')}
+    return step(now);
+  }
+  const s=strengths(F);G.forEach(g=>sm[g.id]+=(s[g.id]-sm[g.id])*.5);
+  step(now);
+}
+
+/* ---------- Rule engine ---------- */
+function step(now){
+  const live=calDone&&!cal;
+  for(const r of S.rules){
+    const st=rs[r.id]??={since:null,armed:true,last:0,prog:0,logged:false},s=sm[r.gesture]||0;
+    if(live&&r.on&&(!paused||r.action==='toggle_pause')){
+      if(s>=r.th){
+        st.since??=now;const held=now-st.since;st.prog=clamp(held/Math.max(1,r.hold));
+        if(held>=r.hold&&st.armed){
+          if(r.rep){if(now-st.last>=r.repMs)fire(r,now,st)}
+          else if(now-st.last>=r.cool){fire(r,now,st);st.armed=false}
+        }
+      }else if(s<r.th*.6){st.since=null;st.armed=true;st.prog=0;st.logged=false}
+    }else{st.since=null;st.prog=0}
+    const m=meters[r.id];
+    if(m){m.f.style.transform=`scaleX(${s})`;m.f.classList.toggle('hot',s>=r.th);m.p.style.transform=`scaleX(${st.prog})`}
+  }
+  for(const g of G){const c=chipEls[g.id];c.style.transform=`scaleX(${sm[g.id]})`;c.classList.toggle('hot',sm[g.id]>=.6)}
+}
+function fire(r,now,st){
+  st.last=now;const quiet=r.rep&&st.logged;st.logged=true;
+  run(r).then(m=>{if(quiet)return;const t=glabel(r.gesture)+' → '+ACT[r.action].label;flash(t);logit(t+(m?': '+m:''))});
+}
+
+/* ---------- Actions ---------- */
+function chime(){audio||=new AudioContext();const t=audio.currentTime;
+  [660,880].forEach((f,i)=>{const o=audio.createOscillator(),g=audio.createGain(),s=t+i*.12;o.frequency.value=f;o.connect(g).connect(audio.destination);
+    g.gain.setValueAtTime(.0001,s);g.gain.exponentialRampToValueAtTime(.2,s+.02);g.gain.exponentialRampToValueAtTime(.0001,s+.4);o.start(s);o.stop(s+.45)})}
+async function run(r){
+  const p=(r.param||'').replace(/\{time\}/g,new Date().toLocaleTimeString()).replace(/\{date\}/g,new Date().toLocaleDateString()).replace(/\{gesture\}/g,glabel(r.gesture));
+  try{switch(r.action){
+    case'type_text':{const n=$('#note');n.value+=p.replace(/\\n/g,'\n');n.scrollTop=n.scrollHeight;return'typed into notepad'}
+    case'toast':toast(p||'Triggered');return p;
+    case'speak':speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(p));return p;
+    case'copy':await navigator.clipboard.writeText(p);return'copied';
+    case'scroll_up':scrollBy(0,-70);return'';
+    case'scroll_down':scrollBy(0,70);return'';
+    case'open_url':{const u=/^https?:\/\//.test(p)?p:'https://'+p;if(!open(u,'_blank','noopener'))toast('Your browser blocked the pop-up. Allow pop-ups for this page.');return u}
+    case'chime':chime();return'';
+    case'webhook':await fetch(p,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({gesture:r.gesture,at:new Date().toISOString()})});return'request sent';
+    case'toggle_pause':paused=!paused;status();toast(paused?'Gesture control paused':'Gesture control resumed');return paused?'paused':'resumed';
+  }}catch{toast('That action failed. Check the rule and try again.');return'failed'}
+}
+
+/* ---------- Rules UI ---------- */
+function renderRules(focus){
+  const box=$('#rules');box.replaceChildren();for(const k in meters)delete meters[k];
+  if(!S.rules.length)box.append(h('p',{className:'empty'},'No rules yet. Select a signal under the camera, or choose Add rule.'));
+  const upd=k=>{save();renderRules(k)};
+  S.rules.forEach(r=>{
+    const gs=h('select',{'aria-label':'Gesture','data-k':r.id+'g',on:{change:e=>{r.gesture=e.target.value;upd(r.id+'g')}}},...G.map(g=>h('option',{value:g.id},g.label)));gs.value=r.gesture;
+    const as=h('select',{'aria-label':'Action','data-k':r.id+'a',on:{change:e=>{r.action=e.target.value;if(r.action.startsWith('scroll')){r.rep=true;r.repMs=70}upd(r.id+'a')}}},
+      ...A.map(([g,l])=>h('optgroup',{label:g},...l.map(([id,label])=>h('option',{value:id},label)))));as.value=r.action;
+    const a=ACT[r.action],f=h('i'),p=h('b',{className:'hold'});meters[r.id]={f,p};
+    const tl=h('span',{},`Trigger at ${Math.round(r.th*100)}%`),hl=h('span',{},`Hold ${r.hold} ms`);
+    const rng=h('input',{type:'range',min:5,max:100,value:Math.round(r.th*100),'aria-label':'Trigger level',on:{input:e=>{r.th=e.target.value/100;tl.textContent=`Trigger at ${e.target.value}%`;save()}}});
+    const hold=h('input',{type:'range',min:0,max:1500,step:50,value:r.hold,'aria-label':'Hold time',on:{input:e=>{r.hold=+e.target.value;hl.textContent=`Hold ${r.hold} ms`;save()}}});
+    box.append(h('div',{className:'rule'},
+      h('div',{className:'sent'},'When I',gs,'Then',as),
+      a.pl?h('label',{className:'field'},a.pl,h('input',{value:r.param,placeholder:a.ph,on:{input:e=>{r.param=e.target.value;save()}}})):'',
+      h('div',{},h('div',{className:'meter'},h('div',{className:'track'},f),rng),p),
+      h('div',{className:'opts'},tl,h('label',{},hl,hold),
+        h('label',{},h('input',{type:'checkbox',checked:r.rep,on:{change:e=>{r.rep=e.target.checked;save()}}}),'Repeat while held')),
+      h('div',{className:'foot'},
+        h('div',{},h('button',{className:'btn sm',on:{click:()=>{run(r);flash('Test: '+a.label)}}},'Test'),
+          h('label',{className:'opts'},h('input',{type:'checkbox',checked:r.on,on:{change:e=>{r.on=e.target.checked;save()}}}),'On')),
+        h('button',{className:'link',on:{click:()=>{S.rules=S.rules.filter(x=>x!==r);upd()}}},'Delete'))));
+  });
+  if(focus)box.querySelector(`[data-k="${focus}"]`)?.focus();
+}
+function addRule(g='smile'){S.rules.push(mk(g,'toast','Nice one!'));save();renderRules();sel(tabs[0]);$('#rules').lastChild.scrollIntoView({block:'nearest'})}
+
+/* ---------- Wiring ---------- */
+G.forEach(g=>{const i=h('i');chipEls[g.id]=i;$('#chips').append(h('button',{className:'chip','aria-label':'Add a rule for '+g.label,on:{click:()=>addRule(g.id)}},g.label,h('div',{className:'bar'},i)))});
+const tabs=[...document.querySelectorAll('[role=tab]')];
+function sel(t){tabs.forEach(x=>{const on=x===t;x.setAttribute('aria-selected',on);x.tabIndex=on?0:-1;$('#'+x.getAttribute('aria-controls')).hidden=!on});t.focus()}
+tabs.forEach((t,i)=>{t.onclick=()=>sel(t);t.onkeydown=e=>{if(e.key==='ArrowRight')sel(tabs[(i+1)%3]);if(e.key==='ArrowLeft')sel(tabs[(i+2)%3])}});
+$('#addBtn').onclick=()=>addRule();
+$('#clrBtn').onclick=()=>$('#note').value='';
+$('#stopBtn').onclick=stop;
+$('#calBtn').onclick=()=>{calDone=false;cal=null;status()};
+const mb=$('#meshBtn');mb.setAttribute('aria-pressed',S.mesh);mb.onclick=()=>{S.mesh=!S.mesh;mb.setAttribute('aria-pressed',S.mesh);save()};
+renderRules();status();
+</script>
+</body>
+</html>

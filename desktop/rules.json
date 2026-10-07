@@ -1,0 +1,9 @@
+[
+  {"gesture": "look_up",   "action": "scroll_up",   "threshold": 0.55, "hold_ms": 250, "repeat": true, "repeat_ms": 80},
+  {"gesture": "look_down", "action": "scroll_down", "threshold": 0.55, "hold_ms": 250, "repeat": true, "repeat_ms": 80},
+  {"gesture": "turn_l",    "action": "key", "param": "left",  "threshold": 0.6, "hold_ms": 300, "cooldown_ms": 900},
+  {"gesture": "turn_r",    "action": "key", "param": "right", "threshold": 0.6, "hold_ms": 300, "cooldown_ms": 900},
+  {"gesture": "brows",     "action": "key", "param": "playpause", "threshold": 0.6, "hold_ms": 300, "cooldown_ms": 1200},
+  {"gesture": "smile",     "action": "screenshot", "threshold": 0.7, "hold_ms": 600, "cooldown_ms": 3000},
+  {"gesture": "pucker",    "action": "toggle_pause", "threshold": 0.6, "hold_ms": 600, "cooldown_ms": 1000}
+]
