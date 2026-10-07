@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Mien — control your screen with your face</title>
+<title>AI — control your screen with your face</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
 <style>
@@ -83,7 +83,7 @@ input[type=range],input[type=checkbox]{accent-color:var(--accent)}
 </head>
 <body>
 <header>
-  <div class="brand"><h1>Mien</h1><p>Face-controlled actions</p></div>
+  <div class="brand"><h1>AI</h1><p>Face-controlled actions</p></div>
   <div class="pill" id="status" role="status"><i></i><span>Camera off</span></div>
 </header>
 <main>
@@ -145,8 +145,8 @@ const glabel=id=>G.find(g=>g.id===id).label;
 const mk=(g,a,p='',hold)=>({id:Math.random().toString(36).slice(2,8),gesture:g,action:a,param:p,th:.6,hold:hold??G.find(x=>x.id===g).hold,cool:800,rep:a.startsWith('scroll'),repMs:70,on:true});
 const starter=()=>[mk('look_up','scroll_up'),mk('look_down','scroll_down'),mk('smile','type_text','Smile logged at {time}\\n'),mk('brows','chime'),mk('pucker','toggle_pause','',600)];
 let S={rules:[],mesh:true};
-try{const j=localStorage.getItem('mien');j?Object.assign(S,JSON.parse(j)):S.rules=starter()}catch{S.rules=starter()}
-const save=()=>{try{localStorage.setItem('mien',JSON.stringify(S))}catch{}};
+try{const j=localStorage.getItem('AI');j?Object.assign(S,JSON.parse(j)):S.rules=starter()}catch{S.rules=starter()}
+const save=()=>{try{localStorage.setItem('AI',JSON.stringify(S))}catch{}};
 let paused=false,running=false,face=false,cal=null,calDone=false,base={earL:.27,earR:.27,pitch:.55,yaw:0};
 let fl,FL,du,audio,last=-1;
 const video=$('#video'),cv=$('#mesh'),cx=cv.getContext('2d'),sm={},rs={},meters={},chipEls={};
