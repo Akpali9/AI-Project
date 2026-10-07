@@ -1,4 +1,4 @@
-# Mien: face-controlled actions
+# AI: face-controlled actions
 
 Two versions of the same idea. Both run face analysis locally; video is never uploaded.
 
@@ -11,7 +11,7 @@ Two versions of the same idea. Both run face analysis locally; video is never up
 ```
 pip install -r requirements.txt
 cd desktop
-python mien_desktop.py
+python AI_desktop.py
 ```
 Python 3.9 to 3.12. The face model downloads on first run. Hold a relaxed face for 2 seconds while it calibrates.
 Window keys: `c` recalibrate, `p` pause, `q` quit.
