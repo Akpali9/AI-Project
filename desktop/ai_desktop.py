@@ -1,6 +1,6 @@
-"""Mien Desktop: control your computer with facial gestures.
+"""ai Desktop: control your computer with facial gestures.
 
-Run:  python mien_desktop.py        Keys in the window: c = recalibrate, p = pause, q = quit
+Run:  python ai_desktop.py        Keys in the window: c = recalibrate, p = pause, q = quit
 Rules live in rules.json (see README.md). Video never leaves your machine.
 """
 import json, math, os, subprocess, time, urllib.request, webbrowser
@@ -78,7 +78,7 @@ def do_action(action, param=""):
     elif action == "open_url":
         webbrowser.open(p if p.startswith("http") else "https://" + p)
     elif action == "screenshot":
-        pyautogui.screenshot(os.path.join(HERE, f"mien-{int(time.time())}.png"))
+        pyautogui.screenshot(os.path.join(HERE, f"ai-{int(time.time())}.png"))
     elif action == "command":         # runs a shell command you wrote in rules.json
         subprocess.Popen(p, shell=True)
     return action + (f": {p}" if p else "")
@@ -184,9 +184,9 @@ def main():
                   else "Live" if face else "No face in view")
         view = cv2.flip(frame, 1)
         hud(view, sm, status, note if now < note_until else "")
-        cv2.imshow("Mien", view)
+        cv2.imshow("ai", view)
         k = cv2.waitKey(1) & 255
-        if k == ord("q") or cv2.getWindowProperty("Mien", cv2.WND_PROP_VISIBLE) < 1:
+        if k == ord("q") or cv2.getWindowProperty("ai", cv2.WND_PROP_VISIBLE) < 1:
             break
         if k == ord("p"):
             paused = not paused
