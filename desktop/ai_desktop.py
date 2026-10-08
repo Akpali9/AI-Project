@@ -1,6 +1,5 @@
 """ai Desktop: control your computer with facial gestures.
 
-
 Run:  python ai_desktop.py        Keys in the window: c = recalibrate, p = pause, q = quit
 Rules live in rules.json (see README.md). Video never leaves your machine.
 """
