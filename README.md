@@ -1,5 +1,6 @@
 # AI: face-controlled actions
 
+
 Two versions of the same idea. Both run face analysis locally; video is never uploaded.
 
 | Folder | What it controls | Run it |
